@@ -1,0 +1,18 @@
+FROM ppc64le/openjdk:8-jdk
+
+ENV	SERVICE_USER=myuser \
+	SERVICE_UID=10001 \
+	SERVICE_GROUP=mygroup \
+	SERVICE_GID=10001
+
+RUN     groupadd -g ${SERVICE_GID} ${SERVICE_GROUP} && \
+        useradd -G ${SERVICE_GROUP} -s /sbin/nologin -u ${SERVICE_UID} ${SERVICE_USER} && \
+        apt-get update -y && apt-get install -y libcap2-bin && \
+        setcap 'cap_net_bind_service=+ep' $(readlink -f $(which java))
+
+COPY java.sh /usr/local/bin/java.sh
+RUN chmod +x /usr/local/bin/java.sh
+
+ARG BUILD_DATE
+ARG BUILD_VERSION
+ARG COMMIT
